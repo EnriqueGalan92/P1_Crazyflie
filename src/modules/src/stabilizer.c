@@ -42,6 +42,7 @@
 #include "power_distribution.h"
 #include "motors.h"
 #include "freefall.h"
+#include "lqr.h"
 
 #ifdef ESTIMATOR_TYPE_kalman
 #include "estimator_kalman.h"
@@ -59,6 +60,19 @@ static control_t control;
 static float test_var = 0;
 static float acc_var = 0;
 static bool freefalling = FALSE;
+
+/*
+ * Parameter values
+ */
+
+static float k_phi = -30.0;
+static float k_theta = -30.0;
+static float k_psy = -20.0;
+static float k_x = -9.0;
+static float k_y = 9.0;
+static float k_z = -6.0;
+static float C_1 = 1024.0;
+static float C_2 = 1/35.0;
 
 
 static void stabilizerTask(void* param);
@@ -133,6 +147,7 @@ static void stabilizerTask(void* param)
         motorsSetRatio(MOTOR_M3, 0);
         motorsSetRatio(MOTOR_M4, 0);
     }
+    // state gets information, lqr to be used after this
     getExtPosition(&state);
 #ifdef ESTIMATOR_TYPE_kalman
     stateEstimatorUpdate(&state, &sensorData, &control);
