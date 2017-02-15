@@ -40,6 +40,8 @@
 #include "sitaw.h"
 #include "controller.h"
 #include "power_distribution.h"
+#include "motors.h"
+#include "freefall.h"
 
 #ifdef ESTIMATOR_TYPE_kalman
 #include "estimator_kalman.h"
@@ -54,6 +56,10 @@ static setpoint_t setpoint;
 static sensorData_t sensorData;
 static state_t state;
 static control_t control;
+static float test_var = 0;
+static float acc_var = 0;
+static bool freefalling = FALSE;
+
 
 static void stabilizerTask(void* param);
 
@@ -110,7 +116,23 @@ static void stabilizerTask(void* param)
 
   while(1) {
     vTaskDelayUntil(&lastWakeTime, F2T(RATE_MAIN_LOOP));
-
+    test_var += 0.1f;
+    acc_var = acc_mag(sensorData.acc.x,sensorData.acc.y, sensorData.acc.z);
+    freefalling = detect_freefall(acc_var);
+    if (freefalling)
+    {
+        motorsSetRatio(MOTOR_M1, 30000);
+        motorsSetRatio(MOTOR_M2, 30000);
+        motorsSetRatio(MOTOR_M3, 30000);
+        motorsSetRatio(MOTOR_M4, 30000);
+    }
+    else
+    {
+        motorsSetRatio(MOTOR_M1, 0);
+        motorsSetRatio(MOTOR_M2, 0);
+        motorsSetRatio(MOTOR_M3, 0);
+        motorsSetRatio(MOTOR_M4, 0);
+    }
     getExtPosition(&state);
 #ifdef ESTIMATOR_TYPE_kalman
     stateEstimatorUpdate(&state, &sensorData, &control);
@@ -123,12 +145,21 @@ static void stabilizerTask(void* param)
 
     sitAwUpdateSetpoint(&setpoint, &sensorData, &state);
 
-    stateController(&control, &setpoint, &sensorData, &state, tick);
-    powerDistribution(&control);
+    //stateController(&control, &setpoint, &sensorData, &state, tick);
+    //powerDistribution(&control);
 
     tick++;
   }
 }
+
+LOG_GROUP_START(freefall_group)
+LOG_ADD(LOG_FLOAT, acc_mag, &acc_var)
+LOG_ADD(LOG_UINT16, freefalling, &freefalling)
+LOG_GROUP_STOP(freefall_group)
+
+LOG_GROUP_START(test_group)
+LOG_ADD(LOG_FLOAT, test, &test_var)
+LOG_GROUP_STOP(test_group)
 
 LOG_GROUP_START(ctrltarget)
 LOG_ADD(LOG_FLOAT, roll, &setpoint.attitude.roll)

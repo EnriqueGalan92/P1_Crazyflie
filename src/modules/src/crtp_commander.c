@@ -51,6 +51,8 @@ void crtpCommanderInit(void)
 static void commanderCrtpCB(CRTPPacket* pk)
 {
   static setpoint_t setpoint;
+  //Gives the time from one excecution to the other.
+  //xTaskGetTickCount();
 
   if(pk->port == CRTP_PORT_SETPOINT && pk->channel == 0) {
     crtpCommanderRpytDecodeSetpoint(&setpoint, pk);
