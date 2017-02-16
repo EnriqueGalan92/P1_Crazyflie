@@ -69,6 +69,15 @@ static float w2 = 0.0;
 static float w3 = 0.0;
 static float w4 = 0.0;
 
+static float k_phi = -30.0;
+static float k_theta = -30.0;
+static float k_psy = -20.0;
+static float k_x = -9.0;
+static float k_y = 9.0;
+static float k_z = -6.0;
+static float C_1 = 1024.0;
+static float C_2 = 1/35.0;
+
 static void stabilizerTask(void* param);
 
 void stabilizerInit(void)
@@ -165,15 +174,15 @@ static void stabilizerTask(void* param)
     uz = u_opp(k_psy, state.attitude.yaw, setpoint.attitude.yaw,
                k_z, sensorData.gyro.z);
 
-    w1 = w_1(ux,uy,uz,setpoint.thrust);
-    w2 = w_2(ux,uy,uz,setpoint.thrust);
-    w3 = w_3(ux,uy,uz,setpoint.thrust);
-    w4 = w_4(ux,uy,uz,setpoint.thrust);
+    w1 = w_1(ux,uy,uz,setpoint.thrust, C_1, C_2);
+    w2 = w_2(ux,uy,uz,setpoint.thrust, C_1, C_2);
+    w3 = w_3(ux,uy,uz,setpoint.thrust, C_1, C_2);
+    w4 = w_4(ux,uy,uz,setpoint.thrust, C_1, C_2);
 
-    motorsSetRatio(MOTOR_M1, w1);
-    motorsSetRatio(MOTOR_M2, w2);
-    motorsSetRatio(MOTOR_M3, w3);
-    motorsSetRatio(MOTOR_M4, w4);
+    motorsSetRatio(MOTOR_M1, 2000);
+    motorsSetRatio(MOTOR_M2, 2000);
+    motorsSetRatio(MOTOR_M3, 2000);
+    motorsSetRatio(MOTOR_M4, 20000);
 
     //stateController(&control, &setpoint, &sensorData, &state, tick);
     //powerDistribution(&control);
