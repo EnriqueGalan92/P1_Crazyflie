@@ -78,6 +78,13 @@ static float k_z = -6.0;
 static float C_1 = 1024.0;
 static float C_2 = 1/35.0;
 
+static uint16_t w1_motor = 0;
+static uint16_t w2_motor = 0;
+static uint16_t w3_motor = 0;
+static uint16_t w4_motor = 0;
+
+const uint16_t MAX_MOTORS = 65534;
+
 static void stabilizerTask(void* param);
 
 void stabilizerInit(void)
@@ -120,6 +127,7 @@ static void stabilizerTask(void* param)
 {
   uint32_t tick = 0;
   uint32_t lastWakeTime;
+
   vTaskSetApplicationTaskTag(0, (void*)TASK_STABILIZER_ID_NBR);
 
   //Wait for the system to be fully started to start stabilization loop
@@ -179,10 +187,30 @@ static void stabilizerTask(void* param)
     w3 = w_3(ux,uy,uz,setpoint.thrust, C_1, C_2);
     w4 = w_4(ux,uy,uz,setpoint.thrust, C_1, C_2);
 
-    motorsSetRatio(MOTOR_M1, 2000);
-    motorsSetRatio(MOTOR_M2, 2000);
-    motorsSetRatio(MOTOR_M3, 2000);
-    motorsSetRatio(MOTOR_M4, 20000);
+    if (MAX_MOTORS > (uint16_t)w1)
+        w1_motor = (uint16_t)w1;
+    else
+        w1_motor = MAX_MOTORS;
+
+    if (MAX_MOTORS > (uint16_t)w2)
+        w2_motor = (uint16_t)w2;
+    else
+        w2_motor = MAX_MOTORS;
+
+    if (MAX_MOTORS > w3)
+        w3_motor = (uint16_t)w3;
+    else
+        w3_motor = MAX_MOTORS;
+
+    if (MAX_MOTORS > (uint16_t)w4)
+        w4_motor = (uint16_t)w4;
+    else
+        w4_motor = MAX_MOTORS;
+
+    motorsSetRatio(MOTOR_M1, w1_motor);
+    motorsSetRatio(MOTOR_M2, w2_motor);
+    motorsSetRatio(MOTOR_M3, w3_motor);
+    motorsSetRatio(MOTOR_M4, w4_motor);
 
     //stateController(&control, &setpoint, &sensorData, &state, tick);
     //powerDistribution(&control);
@@ -202,6 +230,10 @@ LOG_ADD(LOG_FLOAT, w1, &w1)
 LOG_ADD(LOG_FLOAT, w2, &w2)
 LOG_ADD(LOG_FLOAT, w3, &w3)
 LOG_ADD(LOG_FLOAT, w4, &w4)
+LOG_ADD(LOG_UINT16, w1_motors, &w1_motor)
+LOG_ADD(LOG_UINT16, w2_motors, &w2_motor)
+LOG_ADD(LOG_UINT16, w3_motors, &w3_motor)
+LOG_ADD(LOG_UINT16, w4_motors, &w4_motor)
 LOG_ADD(LOG_FLOAT, ux, &ux)
 LOG_ADD(LOG_FLOAT, uy, &uy)
 LOG_ADD(LOG_FLOAT, uz, &uz)
