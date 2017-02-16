@@ -61,6 +61,14 @@ static float test_var = 0;
 static float acc_var = 0;
 static bool freefalling = FALSE;
 
+static float ux = 0.0;
+static float uy = 0.0;
+static float uz = 0.0;
+static float w1 = 0.0;
+static float w2 = 0.0;
+static float w3 = 0.0;
+static float w4 = 0.0;
+
 static void stabilizerTask(void* param);
 
 void stabilizerInit(void)
@@ -119,6 +127,8 @@ static void stabilizerTask(void* param)
     test_var += 0.1f;
     acc_var = acc_mag(sensorData.acc.x,sensorData.acc.y, sensorData.acc.z);
     freefalling = detect_freefall(acc_var);
+/*
+ * Part of the freefalling activity
     if (freefalling)
     {
         motorsSetRatio(MOTOR_M1, 30000);
@@ -133,8 +143,10 @@ static void stabilizerTask(void* param)
         motorsSetRatio(MOTOR_M3, 0);
         motorsSetRatio(MOTOR_M4, 0);
     }
+*/
     // state gets information, lqr to be used after this
     getExtPosition(&state);
+
 #ifdef ESTIMATOR_TYPE_kalman
     stateEstimatorUpdate(&state, &sensorData, &control);
 #else
@@ -146,12 +158,45 @@ static void stabilizerTask(void* param)
 
     sitAwUpdateSetpoint(&setpoint, &sensorData, &state);
 
+    ux = u_opp(k_phi, state.attitude.roll, setpoint.attitude.roll,
+               k_x, sensorData.gyro.x);
+    uy = u_opp(k_theta, state.attitude.pitch, setpoint.attitude.pitch,
+               k_y, sensorData.gyro.y);
+    uz = u_opp(k_psy, state.attitude.yaw, setpoint.attitude.yaw,
+               k_z, sensorData.gyro.z);
+
+    w1 = w_1(ux,uy,uz,setpoint.thrust);
+    w2 = w_2(ux,uy,uz,setpoint.thrust);
+    w3 = w_3(ux,uy,uz,setpoint.thrust);
+    w4 = w_4(ux,uy,uz,setpoint.thrust);
+
+    motorsSetRatio(MOTOR_M1, w1);
+    motorsSetRatio(MOTOR_M2, w2);
+    motorsSetRatio(MOTOR_M3, w3);
+    motorsSetRatio(MOTOR_M4, w4);
+
     //stateController(&control, &setpoint, &sensorData, &state, tick);
     //powerDistribution(&control);
 
     tick++;
   }
 }
+
+LOG_GROUP_START(lqr_controller_group)
+LOG_ADD(LOG_FLOAT, phi, &state.attitude.roll)
+LOG_ADD(LOG_FLOAT, theta, &state.attitude.pitch)
+LOG_ADD(LOG_FLOAT, psy, &state.attitude.yaw)
+LOG_ADD(LOG_FLOAT, wx, &sensorData.gyro.x)
+LOG_ADD(LOG_FLOAT, wy, &sensorData.gyro.y)
+LOG_ADD(LOG_FLOAT, wz, &sensorData.gyro.z)
+LOG_ADD(LOG_FLOAT, ux, &ux)
+LOG_ADD(LOG_FLOAT, uy, &uy)
+LOG_ADD(LOG_FLOAT, uz, &uz)
+LOG_ADD(LOG_FLOAT, pwm1, &w1)
+LOG_ADD(LOG_FLOAT, pwm2, &w2)
+LOG_ADD(LOG_FLOAT, pwm3, &w3)
+LOG_ADD(LOG_FLOAT, pwm4, &w4)
+LOG_GROUP_STOP(lqr_controller_group)
 
 LOG_GROUP_START(freefall_group)
 LOG_ADD(LOG_FLOAT, acc_mag, &acc_var)
