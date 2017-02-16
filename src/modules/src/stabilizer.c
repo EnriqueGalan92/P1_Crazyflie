@@ -61,20 +61,6 @@ static float test_var = 0;
 static float acc_var = 0;
 static bool freefalling = FALSE;
 
-/*
- * Parameter values
- */
-
-static float k_phi = -30.0;
-static float k_theta = -30.0;
-static float k_psy = -20.0;
-static float k_x = -9.0;
-static float k_y = 9.0;
-static float k_z = -6.0;
-static float C_1 = 1024.0;
-static float C_2 = 1/35.0;
-
-
 static void stabilizerTask(void* param);
 
 void stabilizerInit(void)

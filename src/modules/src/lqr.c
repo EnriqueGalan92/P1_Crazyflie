@@ -13,25 +13,32 @@
 #include "param.h"
 #include "sensors.h"
 #include "math.h"
-#include "freefall.h"
+#include "lqr.h"
 
-float u_opp_x (float k_phi, float roll, float roll_ref,
-               float k_x  , float w_x)
+
+float u_opp (float k_p, float attitude, float attitude_ref,
+             float k_axis , float w)
 {
-    float u_x = 0.0;
-    return u_x;
+    float u_res = 0.0;
+    return u_res;
 }
 
-float u_opp_y (float k_theta, float pitch, float pitch_ref,
-               float k_y    , float w_y)
+float w_1 (float u_x, float u_y, float u_z, float u_t)
 {
-    float u_y = 0.0;
-    return u_y;
+    return C_1*sqrt(-u_x + u_y - u_z + (C_2*u_t));
 }
 
-float u_opp_z (float k_psy, float yaw, float yaw_ref,
-               float k_z  , float w_z)
+float w_2 (float u_x, float u_y, float u_z, float u_t)
 {
-    float u_z = 0.0;
-    return u_z;
+    return C_1*sqrt(-u_x - u_y + u_z + (C_2*u_t));
+}
+
+float w_3 (float u_x, float u_y, float u_z, float u_t)
+{
+    return C_1*sqrt( u_x - u_y - u_z + (C_2*u_t));
+}
+
+float w_4 (float u_x, float u_y, float u_z, float u_t)
+{
+    return C_1*sqrt( u_x + u_y + u_z + (C_2*u_t));
 }

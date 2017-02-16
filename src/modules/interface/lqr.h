@@ -20,23 +20,27 @@
  * as PARAMETERS, or set values on
  * attitude_pid_controller.c
  */
+
 /*
- * #define k_phi -30.0
- * #define k_theta -30.0
- * #define k_psy -20.0
- * #define k_x -9.0
- * #define k_y +9.0
- * #define k_z -6.0
- * #define C_1 1024.0
- * #define C_2 1/35.0
+ * Parameter values
  */
-float u_opp_x (float k_phi, float roll, float roll_ref,
-               float k_x  , float w_x);
 
-float u_opp_y (float k_theta, float pitch, float pitch_ref,
-               float k_y    , float w_y);
+static float k_phi = -30.0;
+static float k_theta = -30.0;
+static float k_psy = -20.0;
+static float k_x = -9.0;
+static float k_y = 9.0;
+static float k_z = -6.0;
+static float C_1 = 1024.0;
+static float C_2 = 1/35.0;
 
-float u_opp_z (float k_psy, float yaw, float yaw_ref,
-               float k_z  , float w_z);
+float u_opp (float k_p, float attitude, float attitude_ref,
+             float k_axis , float w);
+
+
+float w_1 (float u_x, float u_y, float u_z, float u_t);
+float w_2 (float u_x, float u_y, float u_z, float u_t);
+float w_3 (float u_x, float u_y, float u_z, float u_t);
+float w_4 (float u_x, float u_y, float u_z, float u_t);
 
 #endif /* SRC_MODULES_INTERFACE_LQR_H_ */
