@@ -24,7 +24,7 @@
 /*
  * Parameter values
  */
-
+#define ZERO 0.0f
 static float k_phi = -30.0;
 static float k_theta = -30.0;
 static float k_psy = -20.0;
@@ -36,7 +36,6 @@ static float C_2 = 1/35.0;
 
 float u_opp (float k_p, float attitude, float attitude_ref,
              float k_axis , float w);
-
 
 float w_1 (float u_x, float u_y, float u_z, float u_t);
 float w_2 (float u_x, float u_y, float u_z, float u_t);
