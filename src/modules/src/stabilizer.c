@@ -197,7 +197,7 @@ static void stabilizerTask(void* param)
     else
         w2_motor = MAX_MOTORS;
 
-    if (MAX_MOTORS > w3)
+    if (MAX_MOTORS > (uint16_t)w3)
         w3_motor = (uint16_t)w3;
     else
         w3_motor = MAX_MOTORS;
