@@ -41,6 +41,7 @@
 #include "queuemonitor.h"
 
 static bool isInit;
+static uint32_t tick_crtp;
 
 static int nopFunc(void);
 static struct crtpLinkOperations nopLink = {
@@ -161,6 +162,7 @@ void crtpRxTask(void *param)
     {
       if (!link->receivePacket(&p))
       {
+        tick_crtp = xTaskGetTickCount();
         if (queues[p.port])
         {
           // The queue is only 1 long, so if the last packet hasn't been processed, we just replace it
@@ -239,4 +241,9 @@ void crtpSetLink(struct crtpLinkOperations * lk)
 static int nopFunc(void)
 {
   return ENETDOWN;
+}
+
+uint32_t get_last_Tick()
+{
+    return tick_crtp;
 }

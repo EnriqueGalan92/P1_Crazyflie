@@ -186,4 +186,6 @@ bool crtpIsConnected(void);
  */
 int crtpReset(void);
 
+uint32_t get_last_Tick();
+
 #endif /*CRTP_H_*/
