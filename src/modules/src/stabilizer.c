@@ -40,6 +40,9 @@
 #include "sitaw.h"
 #include "controller.h"
 #include "power_distribution.h"
+#include "crtp.h"
+#include "motors.h"
+
 
 #ifdef ESTIMATOR_TYPE_kalman
 #include "estimator_kalman.h"
@@ -97,6 +100,9 @@ static void stabilizerTask(void* param)
 {
   uint32_t tick = 0;
   uint32_t lastWakeTime;
+  static uint32_t tick_t = 0;
+  static uint32_t dta_Tick = 0;
+
   vTaskSetApplicationTaskTag(0, (void*)TASK_STABILIZER_ID_NBR);
 
   //Wait for the system to be fully started to start stabilization loop
@@ -123,8 +129,28 @@ static void stabilizerTask(void* param)
 
     sitAwUpdateSetpoint(&setpoint, &sensorData, &state);
 
-    stateController(&control, &setpoint, &sensorData, &state, tick);
-    powerDistribution(&control);
+    tick_t = xTaskGetTickCount();
+    dta_Tick = tick_t - get_last_Tick();
+    if ( dta_Tick < 1000)
+    {
+        /*motorsSetRatio(MOTOR_M1, w1_motor);
+        motorsSetRatio(MOTOR_M2, w2_motor);
+        motorsSetRatio(MOTOR_M3, w3_motor);
+        motorsSetRatio(MOTOR_M4, w4_motor);*/
+        motorsSetRatio(MOTOR_M1, 3000);
+        motorsSetRatio(MOTOR_M2, 0);
+        motorsSetRatio(MOTOR_M3, 0);
+        motorsSetRatio(MOTOR_M4, 0);
+    }
+    else
+    {
+        motorsSetRatio(MOTOR_M1, 0);
+        motorsSetRatio(MOTOR_M2, 0);
+        motorsSetRatio(MOTOR_M3, 0);
+        motorsSetRatio(MOTOR_M4, 0);
+    }
+    //stateController(&control, &setpoint, &sensorData, &state, tick);
+    //powerDistribution(&control);
 
     tick++;
   }
